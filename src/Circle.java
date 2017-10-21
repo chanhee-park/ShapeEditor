@@ -5,9 +5,14 @@ import java.awt.*;
 class Circle extends Shape {
     private int radius;
 
-    Circle(int centerX, int centerY, int radius, Color color) {
+    Circle(int centerX, int centerY, int radius, MyColor color) {
         super(centerX, centerY, color);
         this.radius = radius;
+        this.type = Types.CIRCLE;
+    }
+
+    public Circle() {
+        radius = 20;
     }
 
     @Override

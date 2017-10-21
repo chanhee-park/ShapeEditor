@@ -6,17 +6,24 @@ public class Triangle extends Shape {
     private Point[] points;
     private int width, height;
 
-    Triangle(int centerX, int centerY, int width, int height, Color color) {
+    public Triangle() {
+        width = 40;
+        height = 30;
+    }
+
+    Triangle(int centerX, int centerY, int width, int height, MyColor color) {
         super(centerX, centerY, color);
         this.width = width;
         this.height = height;
+        this.type = Types.TRIANGLE;
         setOtherPoints();
     }
+
 
     @Override
     public void draw(PApplet applet) {
         super.draw(applet);
-        applet.triangle(points[0].x, points[0].y, points[1].x, points[1].y, points[2].x, points[2].y);
+        applet.triangle(points[0].getX(), points[0].getY(), points[1].getX(), points[1].getY(), points[2].getX(), points[2].getY());
     }
 
     @Override
@@ -28,19 +35,16 @@ public class Triangle extends Shape {
     public boolean isCollision(int x, int y) {
         sortPoints();
 
-        if (y < points[0].y || y > points[2].y) return false;
+        if (y < points[0].getY() || y > points[2].getY()) return false;
 
         int m1, m2;
         int x1, x2, tmp;
 
-        if (y < points[1].y) {
-            m1 = ((points[1].x - points[0].x) << 16) / (points[1].y - points[0].y);
-
-            m2 = ((points[2].x - points[0].x) << 16) / (points[2].y - points[0].y);
-
-            x1 = points[0].x + (((y - points[0].y) * m1) >> 16);
-            x2 = points[0].x + (((y - points[0].y) * m2) >> 16);
-
+        if (y < points[1].getY()) {
+            m1 = ((points[1].getX() - points[0].getX()) << 16) / (points[1].getY() - points[0].getY());
+            m2 = ((points[2].getX() - points[0].getX()) << 16) / (points[2].getY() - points[0].getY());
+            x1 = points[0].getX() + (((y - points[0].getY()) * m1) >> 16);
+            x2 = points[0].getX() + (((y - points[0].getY()) * m2) >> 16);
             if (x1 > x2) {
                 tmp = x1;
                 x1 = x2;
@@ -48,12 +52,12 @@ public class Triangle extends Shape {
             }
             return x >= x1 && x <= x2;
         } else {
-            m1 = ((points[1].x - points[2].x) << 16) / (points[1].y - points[2].y);
+            m1 = ((points[1].getX() - points[2].getX()) << 16) / (points[1].getY() - points[2].getY());
 
-            m2 = ((points[0].x - points[2].x) << 16) / (points[0].y - points[2].y);
+            m2 = ((points[0].getX() - points[2].getX()) << 16) / (points[0].getY() - points[2].getY());
 
-            x1 = points[2].x + (((y - points[2].y) * m1) >> 16);
-            x2 = points[2].x + (((y - points[2].y) * m2) >> 16);
+            x1 = points[2].getX() + (((y - points[2].getY()) * m1) >> 16);
+            x2 = points[2].getX() + (((y - points[2].getY()) * m2) >> 16);
 
             if (x1 > x2) {
                 tmp = x1;
@@ -75,17 +79,17 @@ public class Triangle extends Shape {
 
     private void sortPoints() {
         Point temp;
-        if (points[0].y > points[1].y) {
+        if (points[0].getY() > points[1].getY()) {
             temp = points[0];
             points[0] = points[1];
             points[1] = temp;
         }
-        if (points[0].y > points[2].y) {
+        if (points[0].getY() > points[2].getY()) {
             temp = points[0];
             points[0] = points[2];
             points[2] = temp;
         }
-        if (points[1].y > points[2].y) {
+        if (points[1].getY() > points[2].getY()) {
             temp = points[1];
             points[1] = points[2];
             points[2] = temp;

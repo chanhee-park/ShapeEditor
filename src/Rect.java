@@ -7,17 +7,25 @@ class Rect extends Shape {
     private int height;
     private Point start, end;
 
-    Rect(int centerX, int centerY, int width, int height, Color color) {
+    public Rect() {
+        super();
+        this.width =40;
+        this.height = 40;
+    }
+
+    Rect(int centerX, int centerY, int width, int height, MyColor color) {
         super(centerX, centerY, color);
         this.width = width;
         this.height = height;
+        this.type = Types.RECT;
         setOtherPoints();
     }
+
 
     @Override
     public void draw(PApplet applet) {
         super.draw(applet);
-        applet.rect(start.x, start.y, width, height);
+        applet.rect(start.getX(), start.getY(), width, height);
     }
 
     @Override
@@ -27,17 +35,17 @@ class Rect extends Shape {
 
     @Override
     public boolean isCollision(int x, int y) {
-        return (x >= start.x) && (x < end.x) && (y >= start.y) && (y <= end.y);
+        return (x >= start.getX()) && (x < end.getX()) && (y >= start.getY()) && (y <= end.getY());
     }
 
     @Override
     void setOtherPoints() {
         start = new Point();
         end = new Point();
-        start.x = this.getCenterX() - (width / 2);
-        end.x = this.getCenterX() + (width / 2);
-        start.y = this.getCenterY() - (height / 2);
-        end.y = this.getCenterY() + (height / 2);
+        start.setX(this.getCenterX() - (width / 2));
+        end.setX(this.getCenterX() + (width / 2));
+        start.setY(this.getCenterY() - (height / 2));
+        end.setY(this.getCenterY() + (height / 2));
     }
 
     @Override

@@ -1,8 +1,11 @@
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import processing.core.PApplet;
 import processing.event.MouseEvent;
+import com.google.gson.Gson;
 
-import java.awt.*;
 import java.io.*;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +15,7 @@ public class Program extends PApplet {
             @Override
             void mouseClick(int x, int y) {
                 if (shapeToBeMade == null) return;
-                Color color = setRandomColor();
+                MyColor color = setRandomColor();
                 Shape newShape = shapeToBeMade.makeShape(x, y, color);
                 shapes.add(newShape);
             }
@@ -80,24 +83,18 @@ public class Program extends PApplet {
         if (!isControlPressed) {
             return;
         }
-        if (keyCode == 'n' || keyCode == 'N') {
+
+        int key = Character.toLowerCase(keyCode);
+        if (key == 'n') {
             mode = Mode.MAKE;
-        } else if (keyCode == 'd' || keyCode == 'D') {
+        } else if (key == 'd') {
             mode = Mode.CLONE;
-        } else if (keyCode == 'm' || keyCode == 'M') {
+        } else if (key == 'm') {
             mode = Mode.MOVE;
-        } else if (keyCode == 's' || keyCode == 'S') {
-            try {
-                saveShape();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else if (keyCode == 'o' || keyCode == 'O') {
-            try {
-                readFile();
-            } catch (IOException | ClassNotFoundException e) {
-                e.printStackTrace();
-            }
+        } else if (key == 's') {
+            saveShape();
+        } else if (key == 'o') {
+            readFile();
         }
     }
 
@@ -156,11 +153,11 @@ public class Program extends PApplet {
         }
     }
 
-    private static Color setRandomColor() {
+    private static MyColor setRandomColor() {
         int r = (int) (Math.random() * 255);
         int g = (int) (Math.random() * 255);
         int b = (int) (Math.random() * 255);
-        return new Color(r, g, b);
+        return new MyColor(r, g, b);
     }
 
     private void makeButtons() {
@@ -169,11 +166,12 @@ public class Program extends PApplet {
         Circle buttonCircle;
         Triangle buttonTriangle;
 
+        MyColor rgb = new MyColor(100, 100, 100);
+
         int centerX = Constants.BUTTON_RECT_CENTER_X;
         int centerY = Constants.BUTTON_RECT_CENTER_Y;
         int width = Constants.BUTTON_RECT_WIDTH;
         int height = Constants.BUTTON_RECT_HEIGHT;
-        Color rgb = new Color(100, 100, 100);
         buttonRect = new Rect(centerX, centerY, width, height, rgb);
 
         centerX = Constants.BUTTON_CIRCLE_CENTER_X;
@@ -224,25 +222,35 @@ public class Program extends PApplet {
         this.text(announcement2, 50, Constants.WINDOW_HEIGHT - 100);
     }
 
-    private void saveShape() throws IOException {
-        FileOutputStream fos = new FileOutputStream("shape.dat");
-        ObjectOutputStream oos = new ObjectOutputStream(fos);
-        int i = 0;
-        for (Shape shape : shapes) {
-            oos.writeObject(shape);
+    private void saveShape() {
+        BufferedWriter out = null;
+        Gson gson = new GsonBuilder().registerTypeHierarchyAdapter(Shape.class, new ShapeTypeAdapter()).create();
+        String json = gson.toJson(shapes);
+        System.out.println(json);
+        try {
+            out = new BufferedWriter(new FileWriter("shapes.json"));
+            out.write(json);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (out != null) try {
+                out.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
-        fos.close();
-        oos.close();
     }
 
-    private void readFile() throws IOException, ClassNotFoundException {
-        ObjectInputStream ois = new ObjectInputStream(new FileInputStream("shape.dat"));
-
-        Object object;
-        while ((object = ois.readObject()) != null) {
-            if (!(object instanceof Shape)) return;
-            shapes.add((Shape) object);
+    private void readFile() {
+        BufferedReader br;
+        try {
+            br = new BufferedReader(new FileReader("shapes.json"));
+            Gson gson = new GsonBuilder().registerTypeHierarchyAdapter(Shape.class, new ShapeTypeAdapter()).create();
+            Type type = new TypeToken<List<Shape>>() {
+            }.getType();
+            shapes = gson.fromJson(br, type);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
         }
-        ois.close();
     }
 }
